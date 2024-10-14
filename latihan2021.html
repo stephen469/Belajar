@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .card {
+            position: relative;
+            cursor: pointer;
+        }
+        .deleteNote {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: red;
+            border: none;
+            background: transparent;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Notes App</h1>
+        <div class="text-right mb-3">
+            <button id="addNoteBtn" class="btn btn-primary" data-toggle="modal" data-target="#noteModal">Add Post</button>
+        </div>
+        <div id="notesContainer" class="row">
+            <!-- Notes will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Modal for adding and editing notes -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="noteModalLabel">Add Post</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="noteForm">
+                        <div class="form-group">
+                            <label for="noteTitle">Title</label>
+                            <input type="text" class="form-control" id="noteTitle" placeholder="Enter note title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="noteContent">Note</label>
+                            <textarea class="form-control" id="noteContent" rows="3" placeholder="Enter note content" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="saveNoteBtn" class="btn btn-success">Save Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notes = [];
+        let editIndex = null;
+
+        // Function to display notes
+        function displayNotes() {
+            $('#notesContainer').empty();
+            notes.forEach((note, index) => {
+                $('#notesContainer').append(`
+                    <div class="col-md-4">
+                        <div class="card mb-3" data-index="${index}">
+                            <div class="card-body">
+                                <button class="deleteNote" data-index="${index}">&times;</button>
+                                <h5 class="card-title">${note.title}</h5>
+                                <p class="card-text">${note.content}</p>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Add Note Button Click Event
+        $('#addNoteBtn').on('click', function() {
+            $('#noteModalLabel').text('Add Post');
+            $('#noteTitle').val('');
+            $('#noteContent').val('');
+            editIndex = null;
+        });
+
+        // Save Note Button Click Event
+        $('#saveNoteBtn').on('click', function() {
+            const noteTitle = $('#noteTitle').val();
+            const noteContent = $('#noteContent').val();
+            const note = { title: noteTitle, content: noteContent };
+
+            if (editIndex !== null) {
+                notes[editIndex] = note;
+            } else {
+                notes.push(note);
+            }
+            displayNotes();
+            $('#noteModal').modal('hide');
+        });
+
+        // Click on Note to Edit
+        $(document).on('click', '.card', function() {
+            editIndex = $(this).data('index');
+            const note = notes[editIndex];
+            $('#noteModalLabel').text('Edit Post');
+            $('#noteTitle').val(note.title);
+            $('#noteContent').val(note.content);
+            $('#noteModal').modal('show');
+        });
+
+        // Delete Note Button Click Event
+        $(document).on('click', '.deleteNote', function(event) {
+            event.stopPropagation();  // Prevent triggering the card click event
+            const index = $(this).data('index');
+            notes.splice(index, 1);
+            displayNotes();
+        });
+    </script>
+</body>
+</html>
